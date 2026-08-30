@@ -1,0 +1,55 @@
+﻿@model ToDoList.ViewModels.CreateTaskVM
+
+@{
+    ViewData["Title"] = "Add New Task";
+}
+
+<div class="container mt-5" style="max-width: 600px;">
+    <div class="card shadow-sm p-4 border-0 rounded-3">
+        <h3 class="mb-4 text-center fw-bold">Create Task</h3>
+
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+
+            <!-- Hidden UserId to link the task -->
+            <input type="hidden" asp-for="UserId" />
+
+            <!-- Title -->
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label fw-bold">Title</label>
+                <input asp-for="Title" class="form-control" placeholder="Enter task title" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label fw-bold">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Enter details..."></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <!-- Deadline -->
+            <div class="mb-3">
+                <label asp-for="Deadline" class="form-label fw-bold">Deadline</label>
+                <input asp-for="Deadline" class="form-control" type="date" />
+                <span asp-validation-for="Deadline" class="text-danger"></span>
+            </div>
+
+            <!-- File Upload -->
+            <div class="mb-4">
+                <label asp-for="TaskFile" class="form-label fw-bold">Attachment (Optional)</label>
+                <input asp-for="TaskFile" class="form-control" type="file" />
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-between">
+                <a asp-action="UserTasks" asp-route-id="@Model.UserId" class="btn btn-outline-secondary">Cancel</a>
+                <button type="submit" class="btn btn-success px-4">Save Task</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

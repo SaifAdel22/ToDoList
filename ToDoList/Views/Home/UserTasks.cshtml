@@ -1,0 +1,117 @@
+﻿@model ToDoList.Models.User
+
+@{
+    ViewData["Title"] = $"{Model.Name}'s Tasks";
+}
+
+<div class="container mt-4">
+
+    <!-- 1. Header Section: معلومات المستخدم وأزرار التصفح -->
+    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded shadow-sm">
+        <div>
+            <h2 class="m-0 fw-bold">Hello, <span class="text-primary">@Model.Name</span>!</h2>
+            <p class="text-muted m-0">Here is your daily task list.</p>
+        </div>
+        <div>
+            <a asp-action="Index" class="btn btn-outline-secondary me-2">Back to Users</a>
+            <a asp-action="Create" asp-route-userId="@Model.Id" class="btn btn-success">
+                + New Task
+            </a>
+        </div>
+    </div>
+
+    <!-- 2. Tasks Table Section: جدول عرض المهام -->
+    @if (Model.ToDoTasks != null && Model.ToDoTasks.Any())
+    {
+        <div class="table-responsive shadow-sm rounded">
+            <table class="table table-hover align-middle bg-white m-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Title</th>
+                        <th>Description</th>
+                        <th>Deadline</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var task in Model.ToDoTasks)
+                    {
+                        <tr>
+                            <td class="fw-bold">@task.Title</td>
+                            <td>@(string.IsNullOrEmpty(task.Description) ? "-" : task.Description)</td>
+                            <td>@task.Deadline.ToString("yyyy-MM-dd")</td>
+
+                            <!-- Toggle Status Button: تغيير الحالة بضغطة واحدة من غير Edit -->
+                            <td class="text-center">
+                                <form asp-action="ToggleStatus" asp-route-id="@task.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    @if (task.IsCompleted)
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-success rounded-pill px-3" title="Click to mark as Pending">
+                                            ✓ Completed
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-outline-warning text-dark rounded-pill px-3" title="Click to mark as Completed">
+                                            ⌛ Pending
+                                        </button>
+                                    }
+                                </form>
+                            </td>
+
+                            <!-- Actions: فتح المرفق، التعديل، والحذف -->
+                            <td class="text-end">
+                                @if (!string.IsNullOrEmpty(task.FilePath))
+                                {
+                                    <a href="@task.FilePath" target="_blank" class="btn btn-sm btn-info text-white me-1">
+                                        Attachment
+                                    </a>
+                                }
+
+                                <a asp-action="Edit" asp-route-id="@task.Id" class="btn btn-sm btn-warning me-1">
+                                    Edit
+                                </a>
+
+                                <form asp-action="Delete" asp-route-id="@task.Id" method="post" class="d-inline" id="deleteForm-@task.Id">
+                                    @Html.AntiForgeryToken()
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete(@task.Id)">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center mt-3 shadow-sm">
+            No tasks found for <strong>@Model.Name</strong>. Click <strong>+ New Task</strong> to add one!
+        </div>
+    }
+
+</div>
+
+<!-- 3. Scripts Section: SweetAlert2 لتأكيد الحذف -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmDelete(taskId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This task will be deleted permanently!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('deleteForm-' + taskId).submit();
+            }
+        });
+    }
+</script>
